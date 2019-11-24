@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {SendMessage} from "./components/SendMessage";
 import { messaging } from "./init-fcm";
+
+declare var socket: any;
 
 const App: React.FC = () => {
     const [token, setToken] = useState('');
+    const [messageList, setMessageList] = useState<any[]>([]);
 
   useEffect(() => {
       Notification.requestPermission().then((permission) => {
@@ -17,6 +19,7 @@ const App: React.FC = () => {
                       // sendTokenToServer(currentToken);
                       // updateUIForPushEnabled(currentToken);
                       setToken(currentToken);
+                      socket.emit('token', currentToken);
                   } else {
                       // Show permission request.
                       console.log('No Instance ID token available. Request permission to generate one.');
@@ -40,6 +43,7 @@ const App: React.FC = () => {
                       // Send Instance ID token to app server.
                       // sendTokenToServer(refreshedToken);
                       setToken(refreshedToken || '');
+                      socket.emit('token', refreshedToken);
                       alert('token refreshed');
                       // ...
                   }).catch((err) => {
@@ -65,27 +69,27 @@ const App: React.FC = () => {
 
        */
 
-      navigator.serviceWorker.addEventListener("message", (message) => console.log(message));
+      navigator.serviceWorker.addEventListener("message", (message) => {
+          console.log(message);
+          socket.emit('get-messages', {});
+      });
 
       messaging.onMessage((payload) => console.log('Message received. ', payload));
+
+      socket.emit('get-messages', {});
+
+      socket.on('messages', (list: any[]) => {
+          setMessageList(list);
+      });
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          {token}
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+        <div>Token: {token}</div>
+        <SendMessage/>
+        {messageList.map(msg => <div key={msg.id}>
+            {msg.name}: {msg.text}
+        </div>)}
     </div>
   );
 };
