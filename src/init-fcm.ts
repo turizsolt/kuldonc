@@ -10,7 +10,9 @@ const initializedFirebaseApp = firebase.initializeApp({
     messagingSenderId: "720469041543",
     appId: "1:720469041543:web:ffa3b8e6bfcc74eb28f322"
 });
+
 const messaging = initializedFirebaseApp.messaging();
+
 messaging.usePublicVapidKey(
     // Project Settings => Cloud Messaging => Web Push certificates
     "BOhL07ZEcG4ewzyaTqlCugv0A-YEMlP-2UZ-tXiYEhUO_Plh2Wd_fcukLrxkAnkeqktS2TIpd5JH5nr317Rb8Lk"
